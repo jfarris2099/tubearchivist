@@ -49,11 +49,11 @@ class ChannelSubscription:
         url = f"https://www.youtube.com/channel/{channel_id}/streams"
         channel_streams = YtWrap(obs, self.config).extract(url)
         channel = {}
-        if not channel_videos:
+        if channel_videos:
         for channel_entry in channel_videos:
             channel.update(channel_entry)
         
-        if not channel_streams:
+        if channel_streams:
         for channel_entry in channel_streams:
             channel.update(channel_entry)
         
