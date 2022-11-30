@@ -45,14 +45,16 @@ class ChannelSubscription:
             obs["playlistend"] = self.config["subscriptions"]["channel_size"]
 
         url = f"https://www.youtube.com/channel/{channel_id}/videos"
-        channel = YtWrap(obs, self.config).extract(url)
-        if not channel:
-            """ try to get the videos in the streams tab """
-            url = f"https://www.youtube.com/channel/{channel_id}/videos"
-            channel = YtWrap(obs, self.config).extract(url)
-            if not channel:
-                return False
+        channel_videos = YtWrap(obs, self.config).extract(url)
+        url = f"https://www.youtube.com/channel/{channel_id}/streams"
+        channel_streams = YtWrap(obs, self.config).extract(url)
+        if not channel_videos and not channel_streams:
+            return False
 
+        channel = {}
+        for channel_entry in (channel_videos, channel_streams):
+            channel.update(channel_entry)
+        
         last_videos = [(i["id"], i["title"]) for i in channel["entries"]]
         return last_videos
 
