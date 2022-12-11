@@ -45,25 +45,34 @@ class ChannelSubscription:
             obs["playlistend"] = self.config["subscriptions"]["channel_size"]
 
         url = f"https://www.youtube.com/channel/{channel_id}/videos"
-        channel_videos = YtWrap(obs, self.config).extract(url)
-        url = f"https://www.youtube.com/channel/{channel_id}/streams"
-        channel_streams = YtWrap(obs, self.config).extract(url)
-        channel = {}
-        if channel_videos:
-            for channel_entry in channel_videos:
-                channel.update(channel_entry)
+        channel = YtWrap(obs, self.config).extract(url)
         
-        if channel_streams:
-            for channel_entry in channel_streams:
-                channel.update(channel_entry)
-        
-        if not channel_videos and not channel_streams:
+        channel = YtWrap(obs, self.config).extract(url)
+        if not channel:
             return False
 
-        
         last_videos = [(i["id"], i["title"]) for i in channel["entries"]]
         return last_videos
 
+
+    def get_last_youtube_streams(self, channel_id, limit=True):
+        """get a list of last streams from channel"""
+        obs = {
+            "skip_download": True,
+            "extract_flat": True,
+        }
+        if limit:
+            obs["playlistend"] = self.config["subscriptions"]["channel_size"]
+
+        url = f"https://www.youtube.com/channel/{channel_id}/streams"
+        channel = YtWrap(obs, self.config).extract(url)
+        if not channel:
+            return False
+
+        last_videos = [(i["id"], i["title"]) for i in channel["entries"]]
+        return last_videos
+    
+    
     def find_missing(self):
         """add missing videos from subscribed channels to pending"""
         all_channels = self.get_channels()
@@ -82,6 +91,14 @@ class ChannelSubscription:
                 for video in last_videos:
                     if video[0] not in pending.to_skip:
                         missing_videos.append(video[0])
+                        
+            last_streams = self.get_last_youtube_streams(channel_id)
+
+            if last_streams:
+                for stream in last_streams:
+                    if stream[0] not in pending.to_skip:
+                        missing_videos.append(stream[0])
+
             # notify
             message = {
                 "status": "message:rescan",
