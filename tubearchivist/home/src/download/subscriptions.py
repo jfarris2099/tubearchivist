@@ -47,7 +47,6 @@ class ChannelSubscription:
         url = f"https://www.youtube.com/channel/{channel_id}/videos"
         channel = YtWrap(obs, self.config).extract(url)
         
-        channel = YtWrap(obs, self.config).extract(url)
         if not channel:
             return False
 
