@@ -23,6 +23,8 @@ class YtWrap:
         "check_formats": "selected",
         "socket_timeout": 10,
         "extractor_retries": 3,
+        "writeinfojson": True,
+        "writedescription": True,
         "retries": 10,
     }
 

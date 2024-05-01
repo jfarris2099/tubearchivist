@@ -282,6 +282,16 @@ class YoutubeVideo(YouTubeItem, YoutubeSubtitle):
             self.json_data["channel"]["channel_id"],
             self.json_data["youtube_id"] + ".mp4",
         )
+        """build info_json_url for where file will be located"""
+        self.json_data["info_json_url"] = os.path.join(
+            self.json_data["channel"]["channel_id"],
+            self.json_data["youtube_id"] + ".info.json",
+        )
+        """build description_url for where file will be located"""
+        self.json_data["description_url"] = os.path.join(
+            self.json_data["channel"]["channel_id"],
+            self.json_data["youtube_id"] + ".description",
+        )
 
     def delete_media_file(self):
         """delete video file, meta data"""

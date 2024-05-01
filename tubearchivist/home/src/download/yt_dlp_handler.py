@@ -272,6 +272,8 @@ class VideoDownloader:
             "noprogress": True,
             "continuedl": True,
             "writethumbnail": False,
+            "writeinfojson": True,
+            "writedescription": True,
             "noplaylist": True,
         }
 
@@ -349,7 +351,6 @@ class VideoDownloader:
         for file_name in all_cached:
             if youtube_id in file_name:
                 obs["outtmpl"] = os.path.join(dl_cache, file_name)
-
         success, message = YtWrap(obs, self.config).download(youtube_id)
         if not success:
             self._handle_error(youtube_id, message)
@@ -357,7 +358,7 @@ class VideoDownloader:
         if self.obs["writethumbnail"]:
             # webp files don't get cleaned up automatically
             all_cached = ignore_filelist(os.listdir(dl_cache))
-            to_clean = [i for i in all_cached if not i.endswith(".mp4")]
+            to_clean = [i for i in all_cached if (not i.endswith(".mp4") and not i.endswith(".info.json") and not i.endswith(".description"))]
             for file_name in to_clean:
                 file_path = os.path.join(dl_cache, file_name)
                 os.remove(file_path)
@@ -390,6 +391,22 @@ class VideoDownloader:
         shutil.move(old_path, new_path, copy_function=shutil.copyfile)
         if host_uid and host_gid:
             os.chown(new_path, host_uid, host_gid)
+        # move info json file
+        info_file = vid_dict["youtube_id"] + ".info.json"
+        old_info_path = os.path.join(self.cache_dir, "download", info_file)
+        new_info_path = os.path.join(self.media_dir, vid_dict["info_json_url"])
+        # move info json file and fix permission
+        shutil.move(old_info_path, new_info_path, copy_function=shutil.copyfile)
+        if host_uid and host_gid:
+            os.chown(new_info_path, host_uid, host_gid)
+        # move description json file
+        description_file = vid_dict["youtube_id"] + ".description"
+        old_description_path = os.path.join(self.cache_dir, "download", description_file)
+        new_description_path = os.path.join(self.media_dir, vid_dict["description_url"])
+        # move description json file and fix permission
+        shutil.move(old_description_path, new_description_path, copy_function=shutil.copyfile)
+        if host_uid and host_gid:
+            os.chown(new_description_path, host_uid, host_gid)
 
     @staticmethod
     def _delete_from_pending(youtube_id):
